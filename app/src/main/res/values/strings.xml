@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">CloudVisionApi</string>
+    <string name="cloudVisionApiKey">YOUR API KEY HERE</string>
+</resources>
