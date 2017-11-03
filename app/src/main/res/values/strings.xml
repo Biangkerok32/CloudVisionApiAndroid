@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">CloudVisionApi</string>
-    <string name="cloudVisionApiKey">YOUR API KEY HERE</string>
+    <string name="cloudVisionApiKey">AIzaSyAbr4AZ67lcqv6uNJCJjdqS_Dm8_6VGOhQ</string>
+    <string name="label_annotations">Label Annotations</string>
+    <string name="text_annotations">Text Annotations</string>
+    <string name="language">Language</string>
+    <string name="text">Text</string>
 </resources>

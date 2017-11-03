@@ -2,6 +2,8 @@ package byronajin.com.cloudvisionapi;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,9 +13,12 @@ import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +31,7 @@ import byronajin.com.cloudvisionapi.model.request.Request;
 import byronajin.com.cloudvisionapi.model.request.SourceRequest;
 import byronajin.com.cloudvisionapi.model.response.LabelAnnotations;
 import byronajin.com.cloudvisionapi.model.response.Responses;
+import byronajin.com.cloudvisionapi.model.response.TextAnnotations;
 import byronajin.com.cloudvisionapi.network.GetImageFeatures;
 import byronajin.com.cloudvisionapi.network.RetrofitInstance;
 import retrofit2.Call;
@@ -34,11 +40,14 @@ import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
 
-    public final static int MY_REQUEST_CODE = 1;
+    public final static int RESULT_LOAD_IMG = 1;
     private GetImageFeatures service;
 
     private RecyclerView recyclerView;
     private LabelAnnotationsAdapter labelAnnotationsAdapter;
+
+    TextView textViewText;
+    TextView textViewLanguage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,32 +60,40 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setAdapter(labelAnnotationsAdapter);
 
+        textViewText = (TextView) findViewById(R.id.textViewText);
+        textViewLanguage = (TextView) findViewById(R.id.textViewLanguage);
 
         /*Create handle for the RetrofitInstance interface*/
         service = RetrofitInstance.getRetrofitInstance().create(GetImageFeatures.class);
 
     }
 
-    public void takePicture(View view) {
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        startActivityForResult(intent, MY_REQUEST_CODE);
+    public void getImageFromGalery(View view) {
+        Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+        photoPickerIntent.setType("image/*");
+        startActivityForResult(photoPickerIntent, RESULT_LOAD_IMG);
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode,
-                                    Intent data) {
-        if(requestCode == MY_REQUEST_CODE && resultCode == RESULT_OK) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-            // Convert image data to bitmap
-            Bitmap picture = (Bitmap)data.getExtras().get("data");
+        if(requestCode == RESULT_LOAD_IMG && resultCode == RESULT_OK) {
+            try {
+                final Uri imageUri = data.getData();
+                final InputStream imageStream = getContentResolver().openInputStream(imageUri);
+                final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+                ((ImageView)findViewById(R.id.previewImage)).setImageBitmap(selectedImage);
 
-            // Set the bitmap as the source of the ImageView
-            ((ImageView)findViewById(R.id.previewImage))
-                    .setImageBitmap(picture);
+                String base64Bitmap = bitmapToBase64(selectedImage);
+                doNetworkCall(base64Bitmap);
 
-            // More code goes here
-            String base64Bitmap = bitmapToBase64(picture);
-            doNetworkCall(base64Bitmap);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                Toast.makeText(getApplicationContext(), "Something went wrong", Toast.LENGTH_LONG).show();
+            }
+
+        }else {
+            Toast.makeText(getApplicationContext(), "You haven't picked Image",Toast.LENGTH_LONG).show();
         }
     }
 
@@ -105,6 +122,9 @@ public class MainActivity extends AppCompatActivity {
                 ImageFeatures imageFeatures = response.body();
                 Responses responses = imageFeatures.getResponses().get(0);
                 updateDataOnAdapter(responses.getLabelAnnotations());
+
+                if(responses.getTextAnnotations() != null)
+                updateLabelText(responses.getTextAnnotations());
             }
 
             @Override
@@ -121,18 +141,21 @@ public class MainActivity extends AppCompatActivity {
         labelAnnotationsAdapter.notifyDataSetChanged();
     }
 
+    private void updateLabelText(List<TextAnnotations> textAnnotationsList){
+        TextAnnotations textAnnotations = textAnnotationsList.get(0);
+
+        textViewText.setText(textAnnotations.getDescription());
+        textViewLanguage.setText(textAnnotations.getLocale());
+    }
+
     private ImageFeaturesRequest getBodyObject(String bodyValue) {
 
-        SourceRequest sourceRequest = new SourceRequest("https://cloud.google.com/vision/docs/images/ferris-wheel.jpg");
-        SourceRequest sourceRequest2 = new SourceRequest("https://images.techhive.com/images/article/2015/02/paypal_headquarters-100567975-primary.idge.jpg");
-
-
-        ImageRequest imageRequest = new ImageRequest(null, sourceRequest2);
+        ImageRequest imageRequest = new ImageRequest(bodyValue, null);
 
         ArrayList<FeatureRequest> featureRequests = new ArrayList<FeatureRequest>();
         featureRequests.add(new FeatureRequest("LABEL_DETECTION"));
-        featureRequests.add(new FeatureRequest("LOGO_DETECTION"));
-
+        featureRequests.add(new FeatureRequest("TEXT_DETECTION"));
+        featureRequests.add(new FeatureRequest("FACE_DETECTION"));
 
         ArrayList<Request> requests = new ArrayList<Request>();
         requests.add(new Request(imageRequest, featureRequests));

@@ -35,7 +35,11 @@ public class LabelAnnotationsAdapter extends RecyclerView.Adapter<LabelAnnotatio
     @Override
     public void onBindViewHolder(LabelAnnotationsViewHolder holder, int position) {
         LabelAnnotations annotation = labelAnnotations.get(position);
-        holder.score.setText(annotation.getScore().toString());
+
+        Double toPorcentage = (annotation.getScore()*100)/1;
+        String porcentageString = toPorcentage.intValue() + "%";
+
+        holder.score.setText(porcentageString);
         holder.description.setText(annotation.getDescription());
     }
 

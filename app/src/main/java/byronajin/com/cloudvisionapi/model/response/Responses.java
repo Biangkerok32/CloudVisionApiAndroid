@@ -10,7 +10,8 @@ import byronajin.com.cloudvisionapi.model.response.LabelAnnotations;
 
 public class Responses {
     List<LabelAnnotations> labelAnnotations;
-    List<LogoAnnotations> logoAnnotations;
+    List<TextAnnotations> textAnnotations;
+
 
     public List<LabelAnnotations> getLabelAnnotations() {
         return labelAnnotations;
@@ -20,11 +21,11 @@ public class Responses {
         this.labelAnnotations = labelAnnotations;
     }
 
-    public List<LogoAnnotations> getLogoAnnotations() {
-        return logoAnnotations;
+    public List<TextAnnotations> getTextAnnotations() {
+        return textAnnotations;
     }
 
-    public void setLogoAnnotations(List<LogoAnnotations> logoAnnotations) {
-        this.logoAnnotations = logoAnnotations;
+    public void setTextAnnotations(List<TextAnnotations> textAnnotations) {
+        this.textAnnotations = textAnnotations;
     }
 }
