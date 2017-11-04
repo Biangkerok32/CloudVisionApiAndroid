@@ -32,8 +32,7 @@ import byronajin.com.cloudvisionapi.model.response.ImageFeatures;
 import byronajin.com.cloudvisionapi.model.response.LabelAnnotations;
 import byronajin.com.cloudvisionapi.model.response.Responses;
 import byronajin.com.cloudvisionapi.model.response.TextAnnotations;
-import byronajin.com.cloudvisionapi.network.GetImageFeatures;
-import byronajin.com.cloudvisionapi.network.RetrofitInstance;
+import byronajin.com.cloudvisionapi.service.ImageFeatureService;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -49,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
     ImageView previewImage;
 
     public final static int RESULT_LOAD_IMG = 1;
-    private GetImageFeatures service;
+    private ImageFeatureService imageFeatureService;
     private LabelAnnotationsAdapter labelAnnotationsAdapter;
     private ProgressDialog progressDialog;
 
@@ -64,9 +63,7 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setAdapter(labelAnnotationsAdapter);
 
-        /*Create handle for the RetrofitInstance interface*/
-        service = RetrofitInstance.getRetrofitInstance().create(GetImageFeatures.class);
-
+        imageFeatureService = new ImageFeatureService();
     }
 
     public void getImageFromGalery(View view) {
@@ -106,10 +103,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void doNetworkCall(String imageData) {
-        String url = getResources().getString(R.string.cloudVisionApiKey);
+        String apiKey = getResources().getString(R.string.cloudVisionApiKey);
         ImageFeaturesRequest body = getBodyObject(imageData);
 
-        Call<ImageFeatures> call = service.getImageFeatures(url, body);
+        Call<ImageFeatures> call = imageFeatureService.getImageFeatures(apiKey, body);
 
         call.enqueue(new Callback<ImageFeatures>() {
             @Override

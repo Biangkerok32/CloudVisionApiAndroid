@@ -11,7 +11,7 @@ import retrofit2.http.Query;
  * Created by Byron on 11/1/2017.
  */
 
-public interface GetImageFeatures {
+public interface ImageFeaturesAPI {
 
     @POST("v1/images:annotate?")
     Call<ImageFeatures> getImageFeatures(@Query("key") String key, @Body ImageFeaturesRequest body);
