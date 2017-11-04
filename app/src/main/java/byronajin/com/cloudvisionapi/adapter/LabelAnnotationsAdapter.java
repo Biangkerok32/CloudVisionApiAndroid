@@ -58,6 +58,10 @@ public class LabelAnnotationsAdapter extends RecyclerView.Adapter<LabelAnnotatio
         }
     }
 
+    public void clearData() {
+        labelAnnotations.clear();
+    }
+
     public void addAnnotation(LabelAnnotations labelAnnotation) {
         labelAnnotations.add(labelAnnotation);
     }

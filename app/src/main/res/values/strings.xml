@@ -5,4 +5,5 @@
     <string name="text_annotations">Text Annotations</string>
     <string name="language">Language</string>
     <string name="text">Text</string>
+    <string name="dialog_message">Fetching information from API....</string>
 </resources>
