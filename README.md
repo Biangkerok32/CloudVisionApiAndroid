@@ -4,6 +4,10 @@
 
 Submitted by: **Byron Ajin**
 
+## Notes
+
+Pleaase get an api key from cloud console https://console.cloud.google.com/ then set "cloudVisionApiKey" with your key value on "res/values/String"
+
 ## Libraries
 
 - Retrofit 2
